@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "54466243414",
+    "firebase_url": "https://aracomp-pitch.firebaseio.com",
+    "project_id": "aracomp-pitch",
+    "storage_bucket": "aracomp-pitch.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:54466243414:android:f3342d2aa2dedcf3",
+        "android_client_info": {
+          "package_name": "com.example.pitchappfirebase"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "54466243414-m2do24rolhvcq9bc7juon6kdbq6u3iim.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDiCx3pRNoGen9pHGx5WXGu6bsNU-q8McY"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
