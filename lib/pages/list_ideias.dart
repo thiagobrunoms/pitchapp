@@ -2,21 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import "../networking/http_requests.dart";
 import 'package:flutter_rating/flutter_rating.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class IdeiaListPage extends StatefulWidget {
-  GlobalKey<ScaffoldState> _scaffoldKey;
   final BuildContext context;
   final List<DocumentSnapshot> snapshot;
   final MyFirebase myFirebase = MyFirebase();
+  final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  String _userId;
 
   // List<String> localWishesList = [];
   List<String> localIdeasList = [];
 
-  Map<String, List<ValueKey>> starsDocumentIdUniqueKeyMap = {};
-
-  String userId = "outro@sales"; //thiago@sales
-
-  IdeiaListPage(this._scaffoldKey, this.context, this.snapshot);
+  IdeiaListPage(this.context, this.snapshot);
 
   @override
   State<StatefulWidget> createState() {
@@ -34,68 +32,33 @@ class IdeiaListPageState extends State<IdeiaListPage> {
   }
 
   void init() {
-    print("Initializing list ideias");
-    print("Obtendo collections");
+    widget._prefs.then((SharedPreferences prefs) {
+      setState(() {
+        widget._userId = prefs.getString("userId");
+      });
+    });
 
     for (var i = 0; i < widget.snapshot.length; i++) {
-      print("Verificando se ${widget.snapshot[i].documentID} possui votos!");
       CollectionReference collection =
           widget.snapshot[i].reference.collection("votos");
 
-      Firestore.instance.collection("votos").snapshots();
+      collection.getDocuments().then((QuerySnapshot s) {
+        if (s.documents.length > 0) {
+          //mesmo que não exista, a lista eh nao-nula vazia
+          for (var j = 0; j < s.documents.length; j++) {
+            if (s.documents[j].data["userId"] == widget._userId) {
+              print(
+                  "Setando nota ${s.documents[j].data["nota"]} da ideia ${widget.snapshot[i].documentID}");
 
-      print(collection);
-      if (collection != null) {
-        print("collection não eh nulo...");
-        collection.getDocuments().then((QuerySnapshot s) {
-          if (s.documents != null && s.documents.length > 0) {
-            for (var j = 0; j < s.documents.length; j++) {
-              print(s.documents[j].documentID);
-              print(s.documents[j].data["nota"]);
-              print(s.documents[j].data["userId"]);
-
-              if (s.documents[j].data["userId"] == widget.userId) {
-                print(
-                    "Setando nota ${s.documents[j].data["nota"]} da ideia ${widget.snapshot[i].documentID}");
-
-                setState(() {
-                  this.ideaVote[widget.snapshot[i].documentID] =
-                      s.documents[j].data["nota"] + .0;
-                });
-              }
+              setState(() {
+                this.ideaVote[widget.snapshot[i].documentID] =
+                    s.documents[j].data["nota"] + .0;
+              });
             }
           }
-        });
-      } else {
-        print("collection null");
-      }
-
-      // print("referencia collection");
-      // print(collection);
-      // if (collection != null) {
-      //   StreamBuilder<QuerySnapshot>(
-      //       stream: collection.snapshots(),
-      //       builder: (context, snapshot) {
-      //         print("entrou builder");
-      //         print(snapshot.data.documents[0].documentID);
-      //       });
-      //   print(widget.snapshot[i].reference.collection("votos").snapshots().);
-      // }
-
-      //TODO MOSTRAR ISSO NA APRESENTAÇÃO
+        }
+      });
     }
-
-    // widget.db.getMyWishes().then((List<Map> myWishesFromDb) {
-    //   //myWishesFromDB: {id: 1, ideaId: -LTGL-0rVGfT1IBUIyym}
-    //   print("getMyWishes back: ");
-    //   print(myWishesFromDb);
-    //   setState(() {
-    //     for (var i = 0; i < myWishesFromDb.length; i++) {
-    //       print(myWishesFromDb[i]);
-    //       widget.localWishesList.add(myWishesFromDb[i]["ideaId"]);
-    //     }
-    //   });
-    // });
   }
 
   @override
@@ -103,36 +66,6 @@ class IdeiaListPageState extends State<IdeiaListPage> {
     print("widget updated: ");
     init();
   }
-
-  // void makeVote(DocumentSnapshot snapshot) {
-  //   print("Adicionando voto a ref ${snapshot.documentID}");
-  //   print("Adicionando voto a ideaName ${snapshot.data["ideaName"]}");
-
-  //   String ideaId = snapshot.documentID;
-  //   if (!widget.localWishesList.contains(ideaId)) {
-  //     widget.myFirebase.makeVote(snapshot, 1);
-
-  //     setState(() {
-  //       widget.localWishesList.add(ideaId);
-  //     });
-
-  //     widget.db.saveAWish(ideaId);
-  //     Scaffold.of(context).showSnackBar(SnackBar(
-  //       content: Text("Voto realizado com sucesso!"),
-  //     ));
-  //   } else {
-  //     widget.myFirebase.makeVote(snapshot, -1);
-
-  //     setState(() {
-  //       widget.localWishesList.remove(ideaId);
-  //     });
-
-  //     widget.db.deleteAWish(ideaId);
-  //     Scaffold.of(context).showSnackBar(SnackBar(
-  //       content: Text("Voto removido com sucesso!"),
-  //     ));
-  //   }
-  // }
 
   void deleteIdea(DocumentSnapshot snapshot) {
     print("Deletando voto a ref ${snapshot.documentID}");
@@ -142,71 +75,6 @@ class IdeiaListPageState extends State<IdeiaListPage> {
       widget.myFirebase.deleteIdea(snapshot);
     });
   }
-
-  // List<Widget> _createStars2(String documentId) {
-  //   int length = widget.myVotes[documentId];
-
-  //   List<Widget> iconButtons = [];
-  //   IconButton b = null;
-  //   for (var i = 0; i < 5; i++) {
-  //     if (i < length) {
-  //       b = IconButton(
-  //         icon: Icon(Icons.star),
-  //         onPressed: () {
-  //           setState(() {
-  //             print("Escolhendo coração de ${documentId}");
-  //           });
-  //         },
-  //       );
-  //     } else {
-  //       b = IconButton(
-  //         icon: Icon(Icons.star_border),
-  //         onPressed: () {
-  //           setState(() {
-  //             print("Escolhendo coração sem borda de ${documentId}");
-  //           });
-  //         },
-  //       );
-  //     }
-  //     iconButtons.add(b);
-  //   }
-
-  //   setState(() {
-  //     widget.starsWidgetMap[documentId] = iconButtons;
-  //   });
-
-  //   return iconButtons;
-  // }
-
-  // List<Widget> _createStars(String documentId) {
-  //   int length = widget.myVotes[documentId];
-
-  //   List<ValueKey> keys = [];
-  //   return new List<Widget>.generate(5, (int index) {
-  //     ValueKey newKey = new ValueKey(documentId + "-" + index.toString());
-  //     keys.add(newKey);
-
-  //     return length != null &&
-  //             length > index //se a quantidade de votos for menor que a lista
-  //         ? IconButton(
-  //             key: newKey,
-  //             icon: Icon(Icons.star),
-  //             onPressed: () {
-  //               setState(() {
-  //                 print("Coração de ${documentId}");
-  //                 // print(widget._scaffoldKey.currentState.context.);
-  //                 GlobalKey x = new GlobalKey(debugLabel: "a");
-  //                 x.currentWidget.key.toString();
-  //               });
-  //             },
-  //           )
-  //         : IconButton(
-  //             key: ValueKey(index + 1),
-  //             icon: Icon(Icons.star_border),
-  //             onPressed: () {},
-  //           );
-  //   });
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -247,7 +115,7 @@ class IdeiaListPageState extends State<IdeiaListPage> {
                       sum = sum + aVote;
 
                       var userId = snapshot.data.documents[i].data["userId"];
-                      if (userId == widget.userId) {
+                      if (userId == widget._userId) {
                         position = i;
                       }
                     }
@@ -261,10 +129,9 @@ class IdeiaListPageState extends State<IdeiaListPage> {
                       ButtonTheme.bar(
                         child: new StarRating(
                           size: 20,
-                          rating: (this.ideaVote[aPitch.documentID] != null &&
-                                  snapshot.data != null &&
-                                  snapshot.data.documents.length > 0)
-                              ? this.ideaVote[aPitch.documentID]
+                          rating: snapshot.data.documents.length > 0
+                              ? snapshot.data.documents[position].data["nota"] +
+                                  .0
                               : 0.0,
                           color: Colors.orange,
                           borderColor: Colors.grey,
@@ -273,9 +140,15 @@ class IdeiaListPageState extends State<IdeiaListPage> {
                             setState(() {
                               // print(
                               //     "Atualizar ${snapshot.data.documents[position].data["nota"]} PARA ${rating}");
-                              if (snapshot.data != null)
+                              print("onclicked na estrelinha");
+                              print(snapshot.data.documents);
+                              if (snapshot.data.documents.length > 0) {
                                 snapshot.data.documents[position].reference
                                     .updateData({"nota": rating});
+                              } else {
+                                aPitch.reference.collection("votos").add(
+                                    {"nota": rating, "userId": widget._userId});
+                              }
                               this.ideaVote[aPitch.documentID] = rating;
                             });
                           },

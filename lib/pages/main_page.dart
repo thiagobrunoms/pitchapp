@@ -15,7 +15,7 @@ class MyHomePage extends StatelessWidget {
         // return _buildList(context, snapshot.data.documents);
         return TabBarView(children: <Widget>[
           CreatePitchPage(),
-          IdeiaListPage(_scaffoldKey, context, snapshot.data.documents)
+          IdeiaListPage(context, snapshot.data.documents)
         ]);
       },
     );

@@ -1,12 +1,22 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import './pages/main_page.dart';
+import "package:shared_preferences/shared_preferences.dart";
+import "package:uuid/uuid.dart";
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
+  void createOrLoadUser() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    if (preferences.getString("userId") == null)
+      preferences.setString("userId", new Uuid().v4());
+  }
+
   @override
   Widget build(BuildContext context) {
+    createOrLoadUser();
+
     return MaterialApp(
       title: 'Aracomp - Pitch de Ideias',
       home: MyHomePage(),
