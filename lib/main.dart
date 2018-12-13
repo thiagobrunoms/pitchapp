@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import './pages/main_page.dart';
 import "package:shared_preferences/shared_preferences.dart";
 import "package:uuid/uuid.dart";
+import "./pages/view_idea.dart";
 
 void main() => runApp(MyApp());
 

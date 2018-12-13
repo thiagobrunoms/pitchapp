@@ -17,6 +17,7 @@ class CreatePitchPageState extends State<CreatePitchPage> {
   String ideiaName;
   String ideiaDescription;
   String _userId;
+  bool sending = false;
 
   final GlobalKey<FormState> _keyForm = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
@@ -89,10 +90,19 @@ class CreatePitchPageState extends State<CreatePitchPage> {
                 RaisedButton(
                     textColor: Colors.white,
                     color: Theme.of(context).primaryColor,
-                    child: Text("Enviar Ideia"),
+                    child: !sending
+                        ? Text("Enviar Ideia")
+                        : CircularProgressIndicator(
+                            valueColor: new AlwaysStoppedAnimation<Color>(
+                                Colors.orange),
+                          ),
                     onPressed: () {
                       if (!_keyForm.currentState.validate()) return;
                       _keyForm.currentState.save();
+
+                      setState(() {
+                        sending = true;
+                      });
 
                       print(
                           "Enviando projeto: ${name}, nome da ideia: ${ideiaName}, descrição: ${ideiaDescription}, com userId ${_userId} usando firestore");
@@ -109,6 +119,10 @@ class CreatePitchPageState extends State<CreatePitchPage> {
                       reference.then((DocumentReference reference) {
                         print("Retornou de nova firesotore");
                         print(reference.documentID);
+
+                        setState(() {
+                          sending = false;
+                        });
 
                         Scaffold.of(context).showSnackBar(SnackBar(
                             content: Text(

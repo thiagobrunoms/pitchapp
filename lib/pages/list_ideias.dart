@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import "../networking/http_requests.dart";
 import 'package:flutter_rating/flutter_rating.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import "view_idea.dart";
 
 class IdeiaListPage extends StatefulWidget {
   final BuildContext context;
@@ -99,6 +100,16 @@ class IdeiaListPageState extends State<IdeiaListPage> {
                             deleteIdea(aPitch);
                           }
                         : null),
+                onTap: () {
+                  print("Ideia selecionada: ${aPitch.data["ideaName"]}");
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ViewIdea(
+                              aPitch.data["name"],
+                              aPitch.data["ideaName"],
+                              aPitch.data["description"])));
+                },
               ),
               StreamBuilder<QuerySnapshot>(
                 stream: aPitch.reference.collection("votos").snapshots(),
