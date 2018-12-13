@@ -9,8 +9,12 @@ void main() => runApp(MyApp());
 class MyApp extends StatelessWidget {
   void createOrLoadUser() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    if (preferences.getString("userId") == null)
+    if (preferences.getString("userId") == null) {
+      print("recuperou id: ${preferences.getString("userId")}");
       preferences.setString("userId", new Uuid().v4());
+    } else {
+      print(preferences.getString("userId"));
+    }
   }
 
   @override

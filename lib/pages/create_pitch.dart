@@ -5,7 +5,6 @@ import "package:shared_preferences/shared_preferences.dart";
 class CreatePitchPage extends StatefulWidget {
   final firestore = Firestore.instance.collection('pitch');
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
-  String _userId;
 
   @override
   State<StatefulWidget> createState() {
@@ -17,6 +16,7 @@ class CreatePitchPageState extends State<CreatePitchPage> {
   String name;
   String ideiaName;
   String ideiaDescription;
+  String _userId;
 
   final GlobalKey<FormState> _keyForm = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
@@ -31,7 +31,7 @@ class CreatePitchPageState extends State<CreatePitchPage> {
     widget._prefs.then((SharedPreferences prefs) {
       print("uuid do usuario: ${prefs.getString("userId")}");
       setState(() {
-        widget._userId = prefs.getString("userId");
+        _userId = prefs.getString("userId");
       });
     });
   }
@@ -95,13 +95,13 @@ class CreatePitchPageState extends State<CreatePitchPage> {
                       _keyForm.currentState.save();
 
                       print(
-                          "Enviando projeto: ${name}, nome da ideia: ${ideiaName}, descrição: ${ideiaDescription}, com userId ${widget._userId} usando firestore");
+                          "Enviando projeto: ${name}, nome da ideia: ${ideiaName}, descrição: ${ideiaDescription}, com userId ${_userId} usando firestore");
 
                       Map<String, dynamic> newPitch = {
                         "name": name,
                         "ideaName": ideiaName,
                         "description": ideiaDescription,
-                        "userId": widget._userId
+                        "userId": _userId
                       };
 
                       Future<DocumentReference> reference =

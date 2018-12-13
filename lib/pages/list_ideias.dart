@@ -10,8 +10,6 @@ class IdeiaListPage extends StatefulWidget {
   final MyFirebase myFirebase = MyFirebase();
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   String _userId;
-
-  // List<String> localWishesList = [];
   List<String> localIdeasList = [];
 
   IdeiaListPage(this.context, this.snapshot);
@@ -50,10 +48,10 @@ class IdeiaListPageState extends State<IdeiaListPage> {
               print(
                   "Setando nota ${s.documents[j].data["nota"]} da ideia ${widget.snapshot[i].documentID}");
 
-              setState(() {
-                this.ideaVote[widget.snapshot[i].documentID] =
-                    s.documents[j].data["nota"] + .0;
-              });
+              // setState(() {
+              //   this.ideaVote[widget.snapshot[i].documentID] =
+              //       s.documents[j].data["nota"] + .0;
+              // });
             }
           }
         }
@@ -96,7 +94,7 @@ class IdeiaListPageState extends State<IdeiaListPage> {
                 leading: Icon(Icons.lightbulb_outline),
                 trailing: IconButton(
                     icon: Icon(Icons.delete),
-                    onPressed: widget.localIdeasList.contains(aPitch.documentID)
+                    onPressed: aPitch.data["userId"] == widget._userId
                         ? () {
                             deleteIdea(aPitch);
                           }
@@ -107,8 +105,8 @@ class IdeiaListPageState extends State<IdeiaListPage> {
                 builder: (context, snapshot) {
                   double average = 0;
                   double sum = 0;
-                  int position;
-                  print("testadno null " + snapshot.data.toString());
+                  int position = -1;
+
                   if (snapshot.data != null) {
                     for (var i = 0; i < snapshot.data.documents.length; i++) {
                       var aVote = snapshot.data.documents[i].data["nota"];
@@ -129,7 +127,9 @@ class IdeiaListPageState extends State<IdeiaListPage> {
                       ButtonTheme.bar(
                         child: new StarRating(
                           size: 20,
-                          rating: snapshot.data.documents.length > 0
+                          rating: snapshot.data.documents.length > 0 &&
+                                  position !=
+                                      -1 //doc tem votos, mas nao desse usuario
                               ? snapshot.data.documents[position].data["nota"] +
                                   .0
                               : 0.0,
@@ -138,18 +138,17 @@ class IdeiaListPageState extends State<IdeiaListPage> {
                           starCount: 5,
                           onRatingChanged: (rating) {
                             setState(() {
-                              // print(
-                              //     "Atualizar ${snapshot.data.documents[position].data["nota"]} PARA ${rating}");
-                              print("onclicked na estrelinha");
-                              print(snapshot.data.documents);
-                              if (snapshot.data.documents.length > 0) {
+                              if (snapshot.data.documents.length > 0 &&
+                                  position != -1) {
+                                //ideia tem voto e ja tem desse usuario
                                 snapshot.data.documents[position].reference
                                     .updateData({"nota": rating});
                               } else {
+                                //ideia ou não tem voto ou, se tem, não tem desse usuario
                                 aPitch.reference.collection("votos").add(
                                     {"nota": rating, "userId": widget._userId});
                               }
-                              this.ideaVote[aPitch.documentID] = rating;
+                              // this.ideaVote[aPitch.documentID] = rating;
                             });
                           },
                         ),
